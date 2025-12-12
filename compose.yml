@@ -1,0 +1,79 @@
+services:
+  # PostgreSQL with pgvector extension
+  pgvector:
+    image: pgvector/pgvector:pg18-trixie
+    container_name: eve_pgvector
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eve_network
+
+  # Ollama LLM service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: eve_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eve_network
+    profiles:
+      - full
+
+  # Eve Online RAG Bot
+  evewikibot:
+    build:
+      #context: ..
+      dockerfile: Dockerfile
+    container_name: eve_wikibot
+    environment:
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_TEMPERATURE=${OLLAMA_TEMPERATURE}
+      - PGVECTOR_HOST=${PGVECTOR_HOST}
+      - PGVECTOR_PORT=${PGVECTOR_PORT}
+      - PGVECTOR_DATABASE=${PGVECTOR_DATABASE}
+      - PGVECTOR_USER=${PGVECTOR_USER}
+      - PGVECTOR_PASSWORD=${PGVECTOR_PASSWORD}
+      - PGVECTOR_COLLECTION=${PGVECTOR_COLLECTION}
+      - PGVECTOR_EMBEDDING_DIM=${PGVECTOR_EMBEDDING_DIM}
+      - PGVECTOR_TOP_K=${PGVECTOR_TOP_K}
+      - DEBUG=${DEBUG}
+    depends_on:
+      pgvector:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - eve_network
+    profiles:
+      - full
+
+volumes:
+  pgvector_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+networks:
+  eve_network:
+    driver: bridge
