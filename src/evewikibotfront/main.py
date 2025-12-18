@@ -176,4 +176,4 @@ if user_input:
             st.write(bot_response or "No response received")
     
     # Rerun to clear input and update UI
-    st.rerun()
+    #st.rerun()
