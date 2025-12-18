@@ -60,6 +60,20 @@ services:
     networks:
       - eve_network
 
+  # Eve Wiki Bot Frontend
+  evewikibotfront:
+    build:
+      dockerfile: Dockerfile.frontend
+    container_name: eve_wikibot_frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://evewikibot:8000
+    depends_on:
+      - evewikibot
+    networks:
+      - eve_network
+
 volumes:
   pgvector_data:
     driver: local

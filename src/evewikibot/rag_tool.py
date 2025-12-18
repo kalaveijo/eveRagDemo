@@ -115,7 +115,7 @@ class RAGTool:
                     query_sql = sql.SQL("""
                         SELECT 
                             id,
-                            chunk as content,
+                            chunk,
                             title,
                             page_url,
                             embedding <=> %s::vector as distance
@@ -134,7 +134,7 @@ class RAGTool:
                     for row in rows:
                         results.append({
                             "id": row[0],
-                            "content": row[1],
+                            "chunk": row[1],
                             "title": row[2],
                             "page_url": row[3],
                             "distance": float(row[4]),  # Similarity distance
@@ -162,7 +162,7 @@ class RAGTool:
         context_parts = ["## Eve Online Knowledge Base Results:\n"]
         
         for i, result in enumerate(results, 1):
-            content = result.get("content", "")
+            content = result.get("chunk", "")
             title = result.get("title", "")
             page_url = result.get("page_url", "")
             distance = result.get("distance", None)
