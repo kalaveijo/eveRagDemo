@@ -11,11 +11,6 @@ services:
       - "5432:5432"
     volumes:
       - pgvector_data:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - eve_network
 
@@ -29,15 +24,13 @@ services:
       - ollama_data:/root/.ollama
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - eve_network
-    profiles:
-      - full
+    post_start:
+      - command: ollama pull qwen3:1.7b
+        user: root
+      - command: ollama pull embeddinggemma:300m
+        user: root
 
   # Eve Online RAG Bot
   evewikibot:
@@ -48,6 +41,7 @@ services:
     environment:
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
       - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_EMBEDDING_MODEL=${OLLAMA_EMBEDDING_MODEL}
       - OLLAMA_TEMPERATURE=${OLLAMA_TEMPERATURE}
       - PGVECTOR_HOST=${PGVECTOR_HOST}
       - PGVECTOR_PORT=${PGVECTOR_PORT}
@@ -60,13 +54,11 @@ services:
       - DEBUG=${DEBUG}
     depends_on:
       pgvector:
-        condition: service_healthy
+        condition: service_started
       ollama:
-        condition: service_healthy
+        condition: service_started
     networks:
       - eve_network
-    profiles:
-      - full
 
 volumes:
   pgvector_data:

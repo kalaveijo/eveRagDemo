@@ -47,13 +47,8 @@ class RAGTool:
                     # Query to search for similar documents
                     # Note: This assumes pgvector extension is installed and embeddings exist
                     query_sql = sql.SQL("""
-                        SELECT 
-                            id,
-                            content,
-                            metadata,
-                            1 - (embedding <=> %s::vector) as similarity
+                        SELECT *
                         FROM {collection_name}
-                        WHERE metadata->>'collection' = %s
                         ORDER BY embedding <=> %s::vector
                         LIMIT %s
                     """).format(
