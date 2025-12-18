@@ -73,7 +73,7 @@ def send_message(message: str) -> str | None:
         response = requests.post(
             CHAT_ENDPOINT,
             json={"message": message},
-            timeout=30
+            timeout=120
         )
         if response.status_code == 200:
             data = response.json()
