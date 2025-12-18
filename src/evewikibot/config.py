@@ -11,6 +11,7 @@ class OllamaConfig:
     base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     model: str = os.getenv("OLLAMA_MODEL", "gemma3:1b")
     temperature: float = float(os.getenv("OLLAMA_TEMPERATURE", "0.7"))
+    embedding_model: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma:300m")
 
 
 @dataclass

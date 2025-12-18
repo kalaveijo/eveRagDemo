@@ -50,7 +50,7 @@ class EveOnlineRagBotService:
             raise ValueError("Config is required for first initialization")
         
         self.config = config
-        self.rag_tool = RAGTool(config.pgvector)
+        self.rag_tool = RAGTool(config.pgvector, config.ollama)
         self.model = self._init_model()
         self.graph = self._build_graph()
         
