@@ -230,11 +230,14 @@ class MediaWikiCrawler:
         if len(text) <= self.crawler_config.chunk_size:
             return [text]
         
+        # Validate overlap configuration
+        chunk_overlap = min(self.crawler_config.chunk_overlap, self.crawler_config.chunk_size - 1)
+        
         chunks = []
         start = 0
         
         while start < len(text):
-            end = start + self.crawler_config.chunk_size
+            end = min(start + self.crawler_config.chunk_size, len(text))
             
             # If not at the end, try to break at a sentence or paragraph
             if end < len(text):
@@ -257,12 +260,17 @@ class MediaWikiCrawler:
             if chunk:
                 chunks.append(chunk)
             
-            # Move start position with overlap
-            start = end - self.crawler_config.chunk_overlap
+            # Ensure we always make forward progress
+            # If overlap would move us backwards or keep us in place, advance by at least 1
+            next_start = end - chunk_overlap
+            if next_start <= start:
+                start = start + max(1, end - start // 2)
+            else:
+                start = next_start
             
-            # Ensure we make progress
-            if start <= chunks[-1] if chunks else 0:
-                start = end
+            # Safety check: if start didn't advance, break to prevent infinite loop
+            if start >= len(text):
+                break
         
         return chunks
     
