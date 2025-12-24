@@ -184,6 +184,7 @@ class EveOnlineRagBotService:
                         f"Answer the user's question using ONLY the provided search results as source material. "
                         f"You can make your own deductions and explanations, but clearly mark your own thinking "
                         f"by prefixing it with '[My analysis:]' or similar markers. "
+                        f"Provide references to the source material by including URLs. "
                         f"Be accurate, helpful, and educational. If the search results don't contain enough information, "
                         f"acknowledge this limitation.\n\n"
                         f"User's question: {original_query}\n\n"

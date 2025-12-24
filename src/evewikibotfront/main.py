@@ -48,6 +48,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "backend_available" not in st.session_state:
     st.session_state.backend_available = False
+if "processing" not in st.session_state:
+    st.session_state.processing = False
 
 
 def check_backend_health():
@@ -73,7 +75,7 @@ def send_message(message: str) -> str | None:
         response = requests.post(
             CHAT_ENDPOINT,
             json={"message": message},
-            timeout=120
+            timeout=300
         )
         if response.status_code == 200:
             data = response.json()
@@ -131,6 +133,9 @@ with messages_container:
 # Chat input
 st.divider()
 
+# Determine if input should be disabled
+input_disabled = not st.session_state.backend_available or st.session_state.processing
+
 if not st.session_state.backend_available:
     st.warning(
         "⚠️ Backend service is not available. Please ensure the backend is running."
@@ -138,16 +143,28 @@ if not st.session_state.backend_available:
     user_input = st.text_input(
         "Message:",
         disabled=True,
-        placeholder="Waiting for backend to be available..."
+        placeholder="Waiting for backend to be available...",
+        key="chat_input"
+    )
+elif st.session_state.processing:
+    user_input = st.text_input(
+        "Message:",
+        disabled=True,
+        placeholder="Processing previous message...",
+        key="chat_input"
     )
 else:
     user_input = st.text_input(
         "Message:",
-        placeholder="Ask me about Eve Online..."
+        placeholder="Ask me about Eve Online...",
+        key="chat_input"
     )
 
 # Process user input
-if user_input:
+if user_input and not st.session_state.processing:
+    # Set processing flag
+    st.session_state.processing = True
+    
     # Add user message to history
     st.session_state.messages.append({
         "role": "user",
@@ -174,6 +191,9 @@ if user_input:
     with messages_container:
         with st.chat_message("assistant"):
             st.write(bot_response or "No response received")
+    
+    # Clear processing flag
+    st.session_state.processing = False
     
     # Rerun to clear input and update UI
     #st.rerun()

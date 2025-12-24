@@ -31,6 +31,8 @@ services:
         user: root
       - command: ollama pull embeddinggemma:300m
         user: root
+      - command: ollama pull gemma3:1b
+        user: root
 
   # Eve Online RAG Bot
   evewikibot:

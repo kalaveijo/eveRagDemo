@@ -140,6 +140,9 @@ class RAGTool:
                             "distance": float(row[4]),  # Similarity distance
                         })
                     
+                    for result in results:
+                        logger.debug(f"Result: {result['id']}, {result['chunk']}, {result['title']}, {result['page_url']}, {result['distance']}")
+
                     return results
                     
         except Exception as e:
